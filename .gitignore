@@ -34,4 +34,8 @@
 # model files
 *_model
 
+# CMake process files
+CMakeFiles/
 
+# jupyter cache files
+.ipynb_checkpoints/
