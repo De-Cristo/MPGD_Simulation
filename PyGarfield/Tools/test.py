@@ -14,7 +14,7 @@ if sys.platform == 'darwin':
     R.gSystem.Load(path + '/lib64/libGarfield.dylib')
 else:
     R.gSystem.Load(path + '/lib64/libmagboltz.so')
-#     R.gSystem.Load(path + '/lib64/libGarfield.so')
+    R.gSystem.Load(path + '/lib64/libGarfield.so')
     R.gSystem.Load(path + '/lib64/libGarfield.so')
     
 full_sim_result = R.TFile("full_sim_result.root","RECREATE")
@@ -27,7 +27,7 @@ for EVE in range(0,nevents):
     event[0] = EVE
     full_sim_result_tree.Fill()
     
-# full_sim_result_tree.Write()
-# full_sim_result.Close()
+full_sim_result_tree.Write()
+full_sim_result.Close()
 
 exit(0)
