@@ -1,0 +1,13 @@
+# Configuration file for full simulation python project
+
+GasFile=/data/pubfs/zhanglic/workspace/MPGD_Simulation/gas/ar_70_co2_30.gas
+MaxElectronEnergy=6000
+
+
+AnsysFile=/data/pubfs/zhanglic/workspace/MPGD_Simulation/CMS_4GEM_base/CMS_4GEM_1HV/3400V/
+WeightingField=/data/pubfs/zhanglic/workspace/MPGD_Simulation/CMS_4GEM_base/weight
+
+LowerBound=-0.0030
+UpperBound=0.7240
+
+IncidentParticle=photon
