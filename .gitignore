@@ -33,6 +33,7 @@
 
 # model files
 *_model
+CMS_4GEM_base/
 
 # CMake process files
 CMakeFiles/
