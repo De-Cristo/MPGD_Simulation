@@ -40,3 +40,7 @@ CMakeFiles/
 
 # jupyter cache files
 .ipynb_checkpoints/
+
+# some results
+*.root
+*.png
