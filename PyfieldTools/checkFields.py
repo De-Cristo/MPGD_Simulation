@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--multithread", dest="multi",    default=0,     type=int,   help="enable multi-thread with n threads (default = 0)" )
 parser.add_argument("-v", "--verbose",     dest="verb",     default=1,     type=int,   help="different verbose level (default = 1)" )
 parser.add_argument("-b", "--batchMode",   dest="batch",    default=True,  type=bool,  help="if enable batch mode (default = true)" )
-parser.add_argument("-e", "--EField",      dest="ef",       default="../FieldExample/SingleGEM/",  type=str,  help="path to Electric Field file (default = ../FieldExample/SingleGEM/)" )
+parser.add_argument("-e", "--EField",      dest="ef",       default="../ANSYS/single_GEM_0620/",  type=str,  help="path to Electric Field file (default = ../ANSYS/single_GEM_0620/)" )
 args = parser.parse_args()
 
 if args.batch == True:
@@ -58,7 +58,7 @@ fm.PrintRange()
 # sensor = R.Garfield.Sensor()
 # sensor.AddComponent(fm)
 
-pitch = 0.0140
+pitch = 0.0140 #unit is cm
 # sensor.SetArea(-3 * pitch, -3 * pitch, -0.0030, 3 * pitch,  3 * pitch, 1.3040)
 
 ex=ctypes.c_double(0.)
@@ -84,7 +84,6 @@ for ix in range(0,pixal1):
         x = (3 * pitch--3 * pitch)*ix/pixal1+-3 * pitch
         z = (upperbound-lowerbound)*iz/pixal2+lowerbound
         fm.ElectricField(x,y,z,ex,ey,ez,v,med,stat)
-#         hxz.SetBinContent(ix+1,iz+1,math.sqrt(ex.value**2+ey.value**2+ez.value**2))
         hxz.SetBinContent(ix+1,iz+1,ez.value)
 c = R.TCanvas('field','field',900,600)
 c.SetRightMargin(0.15)
@@ -99,13 +98,24 @@ for ix in range(0,pixal1):
         z = (upperbound-lowerbound)*iz/pixal2+lowerbound
         fm.ElectricField(x,y,z,ex,ey,ez,v,med,stat)
         hxz.SetBinContent(ix+1,iz+1,v)
-#         hxz.SetBinContent(ix+1,iz+1,math.sqrt(ex.value**2+ey.value**2+ez.value**2))
-#         hxz.Fill(x,z,ez)
 c = R.TCanvas('potential','potential',900,600)
 c.SetRightMargin(0.15)
 R.gStyle.SetOptStat(0000)
 hxz.Draw('colz4')
 c.SaveAs('./XZ_Potential.png')
+
+hxz = R.TH2D("XZ_Volt_foil","Potential", pixal1, -1 * pitch, 1 * pitch, pixal2, -0.01, 0.01)
+for ix in range(0,pixal1):
+    for iz in range(0,pixal2):
+        x = (1 * pitch--1 * pitch)*ix/pixal1+-1 * pitch
+        z = (upperbound-lowerbound)*iz/pixal2+lowerbound
+        fm.ElectricField(x,y,z,ex,ey,ez,v,med,stat)
+        hxz.SetBinContent(ix+1,iz+1,v)
+c = R.TCanvas('potential','potential',900,600)
+c.SetRightMargin(0.15)
+R.gStyle.SetOptStat(0000)
+hxz.Draw('colz4')
+c.SaveAs('./XZ_Potential_foil.png')
 
 z = 0.0026
 
