@@ -30,11 +30,6 @@ After got accounts and certifications on LXPLUS servers.You can use computer clu
 For more details about **account** and **certifications** can be found at [CERN](https://account.cern.ch/account/).<br />
 Also, you need prepare **account** and **basic skills** about [HTCondor](https://batchdocs.web.cern.ch/index.html) and [EOS](https://cern.service-now.com/service-portal%3Fid=kb_article&n=KB0001998).<br />
 ***
-<style>
-hr:nth-of-type(1) {
-  border-image: linear-gradient(to right, #F00, #0F0 20%, #00F 80%, #000) 1 !important;
-}
-</style>
 You can Login LXPLUS via `ssh -Y` for GUI. For example,<br />
 ```shell
 ssh -Y loginNAME@lxplus.cern.ch
@@ -48,6 +43,65 @@ Run `kinit username` to get a kerberos token for your NICE credentials (Note tha
 **Launch a real simulation**<br />
 **Prepare your Ansys Classic script**<br />
 Create a script called, for instance, `my_script.sh` with the following content(which is modified based on [KB](https://cern.service-now.com/service-portal?id=kb_article&n=KB0006082)) and more details at [twiki](https://twiki.cern.ch/twiki/bin/view/CAE/AnsysService):<br />
+```shell
+. /afs/cern.ch/project/parc/ansys/19.2/cern/ansys192.shrc # this can be changed to whatever ANSYS version you like that existing.
+/afs/cern.ch/project/parc/ansys/19.2/v192/ansys/bin/ansys192 -b nolist -np 8 -j myjob < inputfile.txt > ansys_stdout.txt
+```
+Note the following parameters used in the Ansys command:<br />
+the -b option is essential, the 'nolist' keyword avoids echoing of the input file in the output file. the -np argument specifies the number of (SMP) "processors", and should correspond to the [RequestCpus](https://twiki.cern.ch/twiki/bin/edit/CAE/RequestCpus?topicparent=CAE.LinuxAnsys;nowysiwyg=1) in the HTCondor submit file, -p specifies the license type. the input file and the output file are specified through the < and > redirects. note that "output file" means : the standard output produced by Ansys APDL ; this is not to be confused with the standard output created by the batch job itself (its script) until further notice, it is recommended to stay away from Distributed Ansys (MPI) on HTCondor, and thus : do not use any of the -dis -machines -mpi -mpifile options, one shall not use the -acc option for GPU acceleration AA_R is short for ANSYS license ANSYS Academic Research Mechanical. (More information about ANSYS and licenses, please read the [twiki link](https://twiki.cern.ch/twiki/bin/view/CAE/AnsysService)).
+
+***
+**Prepare your HTCondor script**
+Create the following HTCondor job submission file that you can call, for example, `my_htcondor`:
+```
+executable           = my_script.sh
+transfer_output_files = ""
+output               = output/$(ClusterId).$(ProcId).out
+error                = error/$(ClusterId).$(ProcId).err
+log                  = log/$(ClusterId).log
++WCKey               = Ansys
+queue
+```
+
+In the same folder as `my_htcondor` submission file, the folders output, error and log should be created (this is in AFS and not in EOS, don't get confussed!). You can create the folders using the command `mkdir`. i.e. `mkdir output`.
+Then run `condor_submit my_htcondor`.
+If your job was succesful, you can now proceed to the next section. If not, please, open a SNOW ticket describing your problems and we will help you.
+***
+If you want to submit some large simulation works,
+Then, create an HTCondor job submission file `my_htcondor` in the following way:
+```
+executable           = my_script.sh
+RequestCpus          = 48
++BigMemJob           = True
++WCKey                = Ansys
++AccountingGroup     = "group_u_COMPUTING_GROUP.u_egroupname"
++JobFlavour          = "workday"
+transfer_output_files = ""
+output               = output/$(ClusterId).$(ProcId).out
+error                = error/$(ClusterId).$(ProcId).err
+log                  = log/$(ClusterId).log
+queue
+```
+Then run `condor_submit my_htcondor`.
+
+Please, note that:
+
+By default, the wall time limit of the job is 1h. Follow the instructions explained [here](http://batchdocs.web.cern.ch/batchdocs/local/submit.html) to define the proper `job flavour` according to your job needs. 
+
+In the previous example, the job flavour `workday` has been selected. This defines a limit of 8h. Note that there is in principle no time limit to run on the cluster. 
+There is no limit. If you want to go beyond 1 week (which is the maximum you could specify in the Job flavour), please, do not define the `JobFlavour` and define instead `+MaxRuntime = Number of seconds`.
+
+In this example, 48 cores have been selected. You will have to tune this parameter for your simulation. Make sure the number of cores specified in the HTCondor job submission file matches the parameter np in your script.
+Make sure you change the `group_u_COMPUTING_GROUP.u_egroupname` with a meaningful value like `group_u_EN.u_bigmem`. This information should be given to you by the IT team when granting access to the Big Memory nodes.
+***
+**Useful HTCondor commands**
+Check the status of the job execution: `condor_q`
+Access the job's local files while it is running: `condor_ssh_to_job <jobid>`
+Check all the details about the job: `condor_q -better {job-id}`
+Check how the job was executed once it finishes: `condor_q JOBID -l`
+Check how long the job was running: `condor_history JOBID -limit 1 -af:h RemoteWallClockTime`
+Cancel a job: `condor_rm JOBID`
+For more information on using HTCondor, please check this [guide](http://batchdocs.web.cern.ch/batchdocs/index.html).
 
 ### PyfieldTools
 
