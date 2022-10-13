@@ -104,6 +104,8 @@ Cancel a job: `condor_rm JOBID`
 For more information on using HTCondor, please check this [guide](http://batchdocs.web.cern.ch/batchdocs/index.html).
 
 ### PyfieldTools
+Tools based on python, Garfield++ and ROOT to make plots, etc.
+[checkFields.py](./PyfieldTools/checkFields.py): Make plots of eletric field or potential reading the electric field or potential lists get from ANSYS. (Example hard coding tool.)
 
 ### Simulation
 
