@@ -29,17 +29,17 @@ source setup-garf-lxplus.sh # on LXPLUS clusters
     After got accounts and certifications on LXPLUS servers.You can use computer cluster for simulation works.<br />
     For more details about **account** and **certifications** can be found at [CERN](https://account.cern.ch/account/).<br />
     Also, you need prepare **account** and **basic skills** about [HTCondor](https://batchdocs.web.cern.ch/index.html) and [EOS](https://cern.service-now.com/service-portal%3Fid=kb_article&n=KB0001998).<br />
-___
+***
     You can Login LXPLUS via `ssh -Y` for GUI. For example,<br />
     ```shell
     ssh -Y loginNAME@lxplus.cern.ch
     ```
-___
+***
     After login, some enviroment setting is aquired.<br />
     **Login to LXPLUS**<br />
     Login to `lxplus` using your NICE account.<br />
     Run `kinit username` to get a kerberos token for your NICE credentials (Note that kerberos tokens expire after 24h, so re-run this command if needed)<br />
-___
+***
     **Launch a real simulation**<br />
     **Prepare your Ansys Classic script**<br />
     Create a script called, for instance, `my_script.sh` with the following content(which is modified based on [KB](https://cern.service-now.com/service-portal?id=kb_article&n=KB0006082)) and more details at [twiki](https://twiki.cern.ch/twiki/bin/view/CAE/AnsysService):<br />
