@@ -75,7 +75,7 @@ pixal1 = 400
 pixal2 = 400
 
 x = 0.
-y = 0.02
+y = 0.
 z = 0.
 
 hxz = R.TH2D("XZ_field","E field", pixal1, -3 * pitch, 3 * pitch, pixal2, lowerbound, upperbound)
@@ -90,6 +90,19 @@ c.SetRightMargin(0.15)
 R.gStyle.SetOptStat(0000)
 hxz.Draw('colz4')
 c.SaveAs('./XZ_EField.png')
+
+hxz = R.TH2D("XZ_field_foil","E field", pixal1, -1 * pitch, 1 * pitch, pixal2, -0.01, 0.01)
+for ix in range(0,pixal1):
+    for iz in range(0,pixal2):
+        x = (1 * pitch--1 * pitch)*ix/pixal1+-1 * pitch
+        z = (0.01--0.01)*iz/pixal2+-0.01
+        fm.ElectricField(x,y,z,ex,ey,ez,v,med,stat)
+        hxz.SetBinContent(ix+1,iz+1,ez.value)
+c = R.TCanvas('field','field',900,600)
+c.SetRightMargin(0.15)
+R.gStyle.SetOptStat(0000)
+hxz.Draw('colz4')
+c.SaveAs('./XZ_EField_foil.png')
 
 hxz = R.TH2D("XZ_Volt","Potential", pixal1, -3 * pitch, 3 * pitch, pixal2, lowerbound, upperbound)
 for ix in range(0,pixal1):
@@ -108,7 +121,7 @@ hxz = R.TH2D("XZ_Volt_foil","Potential", pixal1, -1 * pitch, 1 * pitch, pixal2, 
 for ix in range(0,pixal1):
     for iz in range(0,pixal2):
         x = (1 * pitch--1 * pitch)*ix/pixal1+-1 * pitch
-        z = (upperbound-lowerbound)*iz/pixal2+lowerbound
+        z = (0.01--0.01)*iz/pixal2+-0.01
         fm.ElectricField(x,y,z,ex,ey,ez,v,med,stat)
         hxz.SetBinContent(ix+1,iz+1,v)
 c = R.TCanvas('potential','potential',900,600)
