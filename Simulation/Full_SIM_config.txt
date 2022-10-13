@@ -1,0 +1,13 @@
+# Configuration file for full simulation python project
+
+GasFile=../gas/ar_70_co2_30.gas
+MaxElectronEnergy=4000000.0
+
+AnsysFile=../ANSYS/single_GEM_0620/
+MirrorPeriodic=True
+# WeightingField=/data/pubfs/zhanglic/workspace/MPGD_Simulation/CMS_4GEM_base/weight/
+
+LowerBound=-0.1000
+UpperBound=0.1000
+
+IncidentParticle=electron
