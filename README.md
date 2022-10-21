@@ -14,9 +14,8 @@ source setup-garf-lxplus.sh # on LXPLUS clusters
 <!-- TOC -->
 
 - [ANSYS](#ansys)
-- [PyfieldTools](#pyfieldtools)
 - [Simulation](#simulation)
-- [Analysis](#analysis)
+- [PyfieldTools](#pyfieldtools)
 - [NN implementation](#nn-iplementation)
 
 <!-- /TOC -->
@@ -101,12 +100,16 @@ Check how long the job was running: `condor_history JOBID -limit 1 -af:h RemoteW
 Cancel a job: `condor_rm JOBID`<br />
 For more information on using HTCondor, please check this [guide](http://batchdocs.web.cern.ch/batchdocs/index.html).<br />
 
-### PyfieldTools
-Tools based on python, Garfield++ and ROOT to make plots, etc.<br />
-[checkFields.py](./PyfieldTools/checkFields.py): Make plots of eletric field or potential reading the electric field or potential lists get from ANSYS. (Example hard coding tool.)<br />
-
 ### Simulation
+**Environment**
 
-### Analysis
+[checkFields.py](./Simulation/checkFields.py): Make plots of eletric field or potential reading the electric field or potential lists get from ANSYS. (Example hard coding tool.)<br />
+
+
+### PyfieldTools
+This part is very imortant after the simulation because the analysis and basic plotting can be done with tools in this part.<br />
+Tools based on python, Garfield++ and ROOT to make plots, etc.<br />
+To use all the python based tools, you will need a new environment(not from the simulation environment above) at least including `uproot`,`awkward`,`numpy`,`matplotlib`,`boost_histogram`,`mplhep`,`pandas`,`sklearn`,`scipy`, which are all very important libraries for high energy physics or machine learning. Conda is highly recommended.<br />
+
 
 ### NN implementation

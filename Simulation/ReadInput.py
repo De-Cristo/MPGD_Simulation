@@ -71,7 +71,7 @@ def ReadTextFile(filename):
                 print('Link '+weightFile[i-1]+' to '+'readout'+str(i))
             #end
         else:
-            print('\033[1;31m WARNING:: \033[0m Weighting fields do not been set, signals cannot be calculated, please double check!')
+            print('\033[1;31m WARNING:: \033[0m Weighting fields have not been set, signals cannot be calculated, please double check!')
         if "MirrorPeriodic" in settings.keys():
             if settings["MirrorPeriodic"]=="True":
                 print("\033[1;34m Periodic::Enable Mirror Periodic\033[0m")
@@ -105,5 +105,29 @@ def ReadTextFile(filename):
         incidentpart = 'photon'
         print("\033[1;31m ERROR:: \033[0m Incident particle does not been set. default is X-Ray photon")
     
-    return gas,fm,len(weightFile),lowerbound,upperbound,incidentpart
+    kineticenergy = 100 # ev
+    if "Energy" in settings.keys():
+        kineticenergy = settings["Energy"]
+        if kineticenergy=='Ru':
+            print("\033[1;34m Incident_Particle::Kinetic energy will be set to self-generated {0}, which can be found in SimProducer.py\033[0m".format(kineticenergy))
+        else:
+            kineticenergy=float(kineticenergy)
+            print("\033[1;34m Incident_Particle::Kinetic energy will be set to {0}\033[0m".format(str(kineticenergy)))
+    else:
+        print('\033[1;31m WARNING:: \033[0m Kinetic energy of the incident particle has not been set, will be set to default value (100 ev), please double check!')
+    
+    driftboundary = 0.0030
+    if "DriftBoundary" in settings.keys():
+        driftboundary = float(settings["DriftBoundary"])
+        print("\033[1;34m Detector_Geometry::The lower boundary of the drift region will be set to {}\033[0m".format(str(driftboundary)))
+    else:
+        print("\033[1;31m ERROR:: \033[0m Detector_Geometry::The lower boundary of the drift region will be set to {} (default)".format(str(driftboundary)))
         
+    inductboundary = -0.0030
+    if "InductBoundary" in settings.keys():
+        inductboundary = float(settings["InductBoundary"])
+        print("\033[1;34m Detector_Geometry::The upper boundary of the induct region will be set to {}\033[0m".format(str(inductboundary)))
+    else:
+        print("\033[1;31m ERROR:: \033[0m Detector_Geometry::The upper boundary of the induct region will be set to {} (default)".format(str(inductboundary)))
+    
+    return gas,fm,len(weightFile),lowerbound,upperbound,incidentpart,kineticenergy,driftboundary,inductboundary

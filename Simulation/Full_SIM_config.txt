@@ -10,4 +10,11 @@ MirrorPeriodic=True
 LowerBound=-0.1000
 UpperBound=0.1000
 
-IncidentParticle=electron
+#IncidentParticle=electron
+#Energy=Ru
+
+IncidentParticle=photon
+Energy=590
+
+DriftBoundary=0.0030
+InductBoundary=-0.0030
