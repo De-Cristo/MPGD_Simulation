@@ -109,6 +109,14 @@
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Results
+*.root
+*.err
+*.out
+*.log
+*test*
+
 #
 # # IPython
 # profile_default/
