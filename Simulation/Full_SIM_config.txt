@@ -13,8 +13,11 @@ UpperBound=0.1000
 #IncidentParticle=electron
 #Energy=Ru
 
-IncidentParticle=photon
-Energy=590
+#IncidentParticle=photon
+#Energy=590
+
+IncidentParticle=mu-
+Energy=150000000000
 
 DriftBoundary=0.0030
 InductBoundary=-0.0030

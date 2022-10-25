@@ -12,6 +12,7 @@ incident_information =   ['Incident_xposition',
                          ]
 
 ionization_information = ['PrimaryElectron_number',
+                          'PrimaryCluster_number',
                           'PrimaryElectron_xposition',
                           'PrimaryElectron_yposition',
                           'PrimaryElectron_zposition',
@@ -46,6 +47,7 @@ plot_configs = {
     'Incident_energy'              : {"bins": np.linspace(0., 4e6, 100)    , "log": False ,                      },
     'Incident_time'                : {"bins": np.linspace(-0.50, 0.50, 50) , "log": False ,                      },
     'PrimaryElectron_number'       : {"bins": np.linspace(0, 200, 50)      , "log": False ,                      },
+    'PrimaryCluster_number'        : {"bins": np.linspace(0, 20, 20)       , "log": False ,                      },
     'PrimaryElectron_energy'       : {"bins": np.linspace(0, 590, 50)      , "log": False ,    "underflow": -999.},
     'PrimaryElectron_time'         : {"bins": np.linspace(0, 0.05, 50)     , "log": False ,    "underflow": -999.},
     'PrimaryElectron_xposition'    : {"bins": np.linspace(-0.05, 0.05, 50) , "log": False ,    "underflow": -999.},

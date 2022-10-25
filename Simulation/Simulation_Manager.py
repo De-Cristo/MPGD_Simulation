@@ -49,8 +49,9 @@ self.SOURCE           : The type of the incident particle
 class Simulation_Manager:
     
     pitch=0.0140
-    allowed_particle = ['electron','e-']
-    maxPrimaryEle = 1000
+    allowed_particle = ['electron','e-','muon','mu-']
+    maxPrimaryEle = 800
+    maxPrimaryClusters = 50
     maxTimeBins = 2000
 
     def __init__(self, input_file, output_file):
@@ -121,6 +122,13 @@ class Simulation_Manager:
         self.out.branch("Incident_energy",   "F")
         self.out.branch("Incident_time",   "F")
         
+        self.out.branch("PrimaryCluster_number",   "I")
+        self.out.branch("PrimaryCluster_xposition",   "F", self.maxPrimaryClusters)
+        self.out.branch("PrimaryCluster_yposition",   "F", self.maxPrimaryClusters)
+        self.out.branch("PrimaryCluster_zposition",   "F", self.maxPrimaryClusters)
+        self.out.branch("PrimaryCluster_time",        "F", self.maxPrimaryClusters)
+        self.out.branch("PrimaryCluster_energy",      "F", self.maxPrimaryClusters)
+        
         self.out.branch("PrimaryElectron_number",   "I")
         self.out.branch("PrimaryElectron_xposition", "F", self.maxPrimaryEle)
         self.out.branch("PrimaryElectron_yposition", "F", self.maxPrimaryEle)
@@ -145,7 +153,7 @@ class Simulation_Manager:
     
     def photon_loop(self,nevents):
         for EVE in range(0,nevents):
-            print('\033[1;35m Simulation_Manager::\033[0m+++++++++' + 'Event No. ' + str(EVE+1)+' of ' + str(nevents))
+            print('\033[1;35m Simulation_Manager::\033[0m +++++++++' + 'Event No. ' + str(EVE+1)+' of ' + str(nevents))
             self.out.fillBranch("Events",EVE+1)
             x0 = (R.Garfield.RndmUniform()*2-1) * 3 * self.pitch
             x0 = 0.0070
@@ -261,15 +269,16 @@ class Simulation_Manager:
         
     def particle_loop(self,nevents):
         for EVE in range(0,nevents):
-            print('\033[1;35m Simulation_Manager::\033[0m+++++++++' + 'Event No. ' + str(EVE+1)+' of ' + str(nevents))
+            print('\033[1;35m Simulation_Manager::\033[0m +++++++++ ' + 'Event No.' + str(EVE+1)+' of ' + str(nevents))
             self.out.fillBranch("Events",EVE+1)
-            x0 = (R.Garfield.RndmUniform()*2-1) * 2 * self.pitch
+            x0 = (R.Garfield.RndmUniform()*2-1) * 3 * self.pitch
+            x0 = 0.0070
             self.out.fillBranch("Incident_xposition",x0)
             y0 = math.sqrt(3) * self.pitch * (R.Garfield.RndmUniform()*2-1)
             y0 = 0.0000
             self.out.fillBranch("Incident_yposition",y0)
             z0 = self.UB-0.0001
-            z0 = 0.0200
+#             z0 = 0.0200
             self.out.fillBranch("Incident_zposition",z0)
             if self.Energy == 'Ru':
                 e0 = generate_spectrum_Ru(EVE)
@@ -283,28 +292,36 @@ class Simulation_Manager:
             track_dx = math.sin(phi)*math.cos(theta)
             track_dy = math.sin(phi)*math.sin(theta)
             track_dz = -math.cos(phi)
-#             track_dx = 0
-#             track_dy = 0
-#             track_dz = -1
+            track_dx = 0
+            track_dy = 0
+            track_dz = -1
             
             self.TRACK.SetKineticEnergy(e0)
             self.TRACK.NewTrack(x0, y0, z0, t0, track_dx, track_dy, track_dz)
             nel = ctypes.c_int(0)
-            ncls = ctypes.c_int(0)
+            ncluster = ctypes.c_int(0)
             ion = 0
             xcls = ctypes.c_double(0.)
             ycls = ctypes.c_double(0.)
             zcls = ctypes.c_double(0.)
             ecls = ctypes.c_double(0.)
+            ncls = ctypes.c_int(0)
             tcls = ctypes.c_double(0.)
             extra = ctypes.c_double(0.)
-
-            ex0 = ctypes.c_double(0.)
+            
             ex0_list = []
-            ey0 = ctypes.c_double(0.)
             ey0_list = []
-            ez0 = ctypes.c_double(0.)
             ez0_list = []
+            ee0_list = []
+            et0_list = []
+            _PrimaryElectron_number_inDrift = 0
+            _PrimaryElectron_number_inDrift_aval = 0
+            _PrimaryElectron_number_NotinDrift_aval = 0
+            _FinalElectron_number = 0
+            
+            ex0 = ctypes.c_double(0.)
+            ey0 = ctypes.c_double(0.)
+            ez0 = ctypes.c_double(0.)
             ee0 = ctypes.c_double(0.)
             et0 = ctypes.c_double(0.)
             edx0 = ctypes.c_double(0.)
@@ -312,30 +329,74 @@ class Simulation_Manager:
             edz0 = ctypes.c_double(0.)
             
             while(self.TRACK.GetCluster(xcls, ycls, zcls, tcls, ncls, ecls, extra)):
+                ncluster.value+=1
+                print('\033[1;35m Simulation_Manager::\033[0m'+'Event No.' + str(EVE+1)+' - Cluster No.' + str(ncluster.value) + ' contains '+str(ncls.value) + ' electrons.')
                 for i in range(nel.value, nel.value+ncls.value):
                     i_c = ctypes.c_int(i-nel.value)
+                    print('\033[1;35m Simulation_Manager::\033[0m'+'Tracking electron No.'+str(i_c.value))
                     self.TRACK.GetElectron(i_c.value, ex0, ey0, ez0, et0, ee0, edx0, edy0, edz0)
                     ex0_list.append(ex0.value)
                     ey0_list.append(ey0.value)
                     ez0_list.append(ez0.value)
+                    ee0_list.append(ee0.value)
+                    et0_list.append(et0.value)
+                    
+                    if ez0.value>self.DriftBoundary:
+                        _PrimaryElectron_number_inDrift+=1
+                    self.AVAL.AvalancheElectron(ex0, ey0, ez0, et0, ee0, edx0, edy0, edz0)
+                    np = self.AVAL.GetNumberOfElectronEndpoints()
+                    if np>1 and ez0.value>self.DriftBoundary:
+                        _PrimaryElectron_number_inDrift_aval+=1
+                    if np>1 and ez0.value<self.DriftBoundary:
+                        _PrimaryElectron_number_NotinDrift_aval+=1
+                    xe1 = ctypes.c_double(0.)
+                    ye1 = ctypes.c_double(0.)
+                    ze1 = ctypes.c_double(0.)
+                    te1 = ctypes.c_double(0.)
+                    ee1 = ctypes.c_double(0.)
+
+                    xe2 = ctypes.c_double(0.)
+                    ye2 = ctypes.c_double(0.)
+                    ze2 = ctypes.c_double(0.)
+                    te2 = ctypes.c_double(0.)
+                    ee2 = ctypes.c_double(0.)
+                    status = ctypes.c_int(0)
+                    
+                    for j in range(0,np):
+                        self.AVAL.GetElectronEndpoint(j, xe1, ye1, ze1, te1, ee1, xe2, ye2, ze2, te2, ee2, status)
+                        if (ze2.value < self.InductBoundary):
+                            _FinalElectron_number+=1
+                                       
                     
                 nel.value+=ncls.value
             
-            self.out.fillBranch("PrimaryElectron_number",nel.value)
             if nel.value!=0:
                 ion = 1
             self.out.fillBranch("ionization",ion)
+            self.out.fillBranch("PrimaryCluster_number",ncluster.value)
+            self.out.fillBranch("PrimaryElectron_number",nel.value)
             ex0_list = make_list(ex0_list,self.maxPrimaryEle)
             ey0_list = make_list(ey0_list,self.maxPrimaryEle)
             ez0_list = make_list(ez0_list,self.maxPrimaryEle)
+            ee0_list = make_list(ee0_list,self.maxPrimaryEle)
+            et0_list = make_list(et0_list,self.maxPrimaryEle)
             self.out.fillBranch("PrimaryElectron_xposition",ex0_list)
             self.out.fillBranch("PrimaryElectron_yposition",ey0_list)
             self.out.fillBranch("PrimaryElectron_zposition",ez0_list)
+            self.out.fillBranch("PrimaryElectron_energy",ee0_list)
+            self.out.fillBranch("PrimaryElectron_time",et0_list)
+            self.out.fillBranch("PrimaryElectron_number_inDrift",_PrimaryElectron_number_inDrift)
+            self.out.fillBranch("PrimaryElectron_number_inDrift_aval",_PrimaryElectron_number_inDrift_aval)
+            self.out.fillBranch("PrimaryElectron_number_NotinDrift_aval",_PrimaryElectron_number_NotinDrift_aval)
+            self.out.fillBranch("FinalElectron_number",_FinalElectron_number)
+            if _PrimaryElectron_number_inDrift != 0 :
+                self.out.fillBranch("Effective_Gain",float(_FinalElectron_number)/float(_PrimaryElectron_number_inDrift))
+            else:
+                self.out.fillBranch("Effective_Gain",-999.)
+                
             
             
-            
-            
-            
+            # place for signal simulation
             
             
             self.out.fill()

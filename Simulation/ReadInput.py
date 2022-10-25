@@ -4,12 +4,8 @@
 # First contributed by PKU-CMS GEM group 2022-10-13 Licheng ZHANG                       #
 # Author: contact L.C.ZHANG (licheng.zhang@cern.ch)                                     #
 #########################################################################################
-import ROOT as R
 import os, sys
-import math
-import ctypes
-import argparse
-from array import array
+import ROOT as R
 
 def CleanLines(lines):
     cleanedLines=[]
