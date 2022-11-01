@@ -195,5 +195,5 @@ def make_list(_list,max_num):
     if len(_list)>max_num:
         _list=_list[:max_num]
     else:
-        _list+=(max_num-len(_list))*[-999]
+        _list+=(max_num-len(_list))*[-9.0]
     return _list

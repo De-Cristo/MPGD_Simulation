@@ -51,7 +51,7 @@ class Simulation_Manager:
     pitch=0.0140
     allowed_particle = ['electron','e-','muon','mu-']
     maxPrimaryEle = 800
-    maxPrimaryClusters = 50
+    maxPrimaryClusters = 40
     maxTimeBins = 2000
 
     def __init__(self, input_file, output_file):
@@ -196,14 +196,14 @@ class Simulation_Manager:
             _FinalElectron_number = 0
             if nel.value!=0:
                 ion = 1
-                ex0 = ctypes.c_double(-999.)
-                ey0 = ctypes.c_double(-999.)
-                ez0 = ctypes.c_double(-999.)
-                ee0 = ctypes.c_double(-999.)
-                et0 = ctypes.c_double(-999.)
-                edx0 = ctypes.c_double(-999.)
-                edy0 = ctypes.c_double(-999.)
-                edz0 = ctypes.c_double(-999.)
+                ex0 = ctypes.c_double(-9.)
+                ey0 = ctypes.c_double(-9.)
+                ez0 = ctypes.c_double(-9.)
+                ee0 = ctypes.c_double(-9.)
+                et0 = ctypes.c_double(-9.)
+                edx0 = ctypes.c_double(0.)
+                edy0 = ctypes.c_double(0.)
+                edz0 = ctypes.c_double(0.)
                 for i in range(0,nel.value):
                     print('Tracking No. ' + str(i+1) + ' Primary Electron')
                     i_c = ctypes.c_int(i)
@@ -301,12 +301,17 @@ class Simulation_Manager:
             nel = ctypes.c_int(0)
             ncluster = ctypes.c_int(0)
             ion = 0
-            xcls = ctypes.c_double(0.)
-            ycls = ctypes.c_double(0.)
-            zcls = ctypes.c_double(0.)
-            ecls = ctypes.c_double(0.)
+            xcls_list = []
+            ycls_list = []
+            zcls_list = []
+            ecls_list = []
+            tcls_list = []
             ncls = ctypes.c_int(0)
-            tcls = ctypes.c_double(0.)
+            xcls = ctypes.c_double(-9.)
+            ycls = ctypes.c_double(-9.)
+            zcls = ctypes.c_double(-9.)
+            ecls = ctypes.c_double(-9.)
+            tcls = ctypes.c_double(-9.)
             extra = ctypes.c_double(0.)
             
             ex0_list = []
@@ -319,17 +324,23 @@ class Simulation_Manager:
             _PrimaryElectron_number_NotinDrift_aval = 0
             _FinalElectron_number = 0
             
-            ex0 = ctypes.c_double(0.)
-            ey0 = ctypes.c_double(0.)
-            ez0 = ctypes.c_double(0.)
-            ee0 = ctypes.c_double(0.)
-            et0 = ctypes.c_double(0.)
+            ex0 = ctypes.c_double(-9.)
+            ey0 = ctypes.c_double(-9.)
+            ez0 = ctypes.c_double(-9.)
+            ee0 = ctypes.c_double(-9.)
+            et0 = ctypes.c_double(-9.)
             edx0 = ctypes.c_double(0.)
             edy0 = ctypes.c_double(0.)
             edz0 = ctypes.c_double(0.)
             
+#             self.TRACK.DisableDeltaElectronTransport() # cannot disable
             while(self.TRACK.GetCluster(xcls, ycls, zcls, tcls, ncls, ecls, extra)):
                 ncluster.value+=1
+                xcls_list.append(xcls.value)
+                ycls_list.append(ycls.value)
+                zcls_list.append(zcls.value)
+                ecls_list.append(ecls.value)
+                tcls_list.append(tcls.value)
                 print('\033[1;35m Simulation_Manager::\033[0m'+'Event No.' + str(EVE+1)+' - Cluster No.' + str(ncluster.value) + ' contains '+str(ncls.value) + ' electrons.')
                 for i in range(nel.value, nel.value+ncls.value):
                     i_c = ctypes.c_int(i-nel.value)
@@ -374,6 +385,16 @@ class Simulation_Manager:
                 ion = 1
             self.out.fillBranch("ionization",ion)
             self.out.fillBranch("PrimaryCluster_number",ncluster.value)
+            xcls_list = make_list(xcls_list,self.maxPrimaryClusters)
+            ycls_list = make_list(ycls_list,self.maxPrimaryClusters)
+            zcls_list = make_list(zcls_list,self.maxPrimaryClusters)
+            tcls_list = make_list(tcls_list,self.maxPrimaryClusters)
+            ecls_list = make_list(ecls_list,self.maxPrimaryClusters)
+            self.out.fillBranch("PrimaryCluster_xposition",xcls_list)
+            self.out.fillBranch("PrimaryCluster_yposition",ycls_list)
+            self.out.fillBranch("PrimaryCluster_zposition",zcls_list)
+            self.out.fillBranch("PrimaryCluster_energy",ecls_list)
+            self.out.fillBranch("PrimaryCluster_time",ecls_list)
             self.out.fillBranch("PrimaryElectron_number",nel.value)
             ex0_list = make_list(ex0_list,self.maxPrimaryEle)
             ey0_list = make_list(ey0_list,self.maxPrimaryEle)
@@ -392,7 +413,7 @@ class Simulation_Manager:
             if _PrimaryElectron_number_inDrift != 0 :
                 self.out.fillBranch("Effective_Gain",float(_FinalElectron_number)/float(_PrimaryElectron_number_inDrift))
             else:
-                self.out.fillBranch("Effective_Gain",-999.)
+                self.out.fillBranch("Effective_Gain",-9.)
                 
             
             
@@ -402,8 +423,3 @@ class Simulation_Manager:
             self.out.fill()
         self.out.write()
         return 1
-    
-#     def end_loop(self):
-#         self.outTree_name.Write()
-#         self.outFile_name.Close()
-        

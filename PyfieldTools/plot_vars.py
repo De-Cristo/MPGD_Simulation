@@ -18,6 +18,11 @@ ionization_information = ['PrimaryElectron_number',
                           'PrimaryElectron_zposition',
                           'PrimaryElectron_energy',
                           'PrimaryElectron_time',
+                          'PrimaryCluster_xposition',
+                          'PrimaryCluster_yposition',
+                          'PrimaryCluster_zposition',
+                          'PrimaryCluster_energy',
+                          'PrimaryCluster_time',
                           'PrimaryElectron_number_inDrift',
                           'PrimaryElectron_number_inDrift_aval',
                           'PrimaryElectron_number_NotinDrift_aval',
@@ -31,11 +36,16 @@ all_information = global_information+incident_information+ionization_information
 
 twod_list = ['primary_electron_xz',
              'primary_electron_yz',
+             'primary_cluster_xz',
+             'primary_cluster_yz',
+             
             ]
 
 twod_plots = {
     'primary_electron_xz': ['PrimaryElectron_xposition','PrimaryElectron_zposition', -0.05, 0.05, -0.1, 0.1],
-    'primary_electron_yz': ['PrimaryElectron_yposition','PrimaryElectron_zposition', -0.5, 0.5, -0.1, 0.1]
+    'primary_electron_yz': ['PrimaryElectron_yposition','PrimaryElectron_zposition', -0.5, 0.5, -0.1, 0.1],
+    'primary_cluster_xz' : ['PrimaryCluster_xposition','PrimaryCluster_zposition', -0.05, 0.05, -0.1, 0.1],
+    'primary_cluster_yz' : ['PrimaryCluster_yposition','PrimaryCluster_zposition', -0.5, 0.5, -0.1, 0.1]
 }
 
 plot_configs = {
@@ -48,16 +58,21 @@ plot_configs = {
     'Incident_time'                : {"bins": np.linspace(-0.50, 0.50, 50) , "log": False ,                      },
     'PrimaryElectron_number'       : {"bins": np.linspace(0, 200, 50)      , "log": False ,                      },
     'PrimaryCluster_number'        : {"bins": np.linspace(0, 20, 20)       , "log": False ,                      },
-    'PrimaryElectron_energy'       : {"bins": np.linspace(0, 590, 50)      , "log": False ,    "underflow": -999.},
-    'PrimaryElectron_time'         : {"bins": np.linspace(0, 0.05, 50)     , "log": False ,    "underflow": -999.},
-    'PrimaryElectron_xposition'    : {"bins": np.linspace(-0.05, 0.05, 50) , "log": False ,    "underflow": -999.},
-    'PrimaryElectron_yposition'    : {"bins": np.linspace(-0.05, 0.05, 50) , "log": False ,    "underflow": -999.},
-    'PrimaryElectron_zposition'    : {"bins": np.linspace(-0.10, 0.10, 50) , "log": False ,    "underflow": -999.},
+    'PrimaryElectron_energy'       : {"bins": np.linspace(0, 590, 50)      , "log": False ,      "underflow": -9.},
+    'PrimaryElectron_time'         : {"bins": np.linspace(0, 0.05, 50)     , "log": False ,      "underflow": -9.},
+    'PrimaryElectron_xposition'    : {"bins": np.linspace(-0.05, 0.05, 50) , "log": False ,      "underflow": -9.},
+    'PrimaryElectron_yposition'    : {"bins": np.linspace(-0.05, 0.05, 50) , "log": False ,      "underflow": -9.},
+    'PrimaryElectron_zposition'    : {"bins": np.linspace(-0.10, 0.10, 50) , "log": False ,      "underflow": -9.},
+    'PrimaryCluster_xposition'     : {"bins": np.linspace(-0.05, 0.05, 50) , "log": False ,      "underflow": -9.},
+    'PrimaryCluster_yposition'     : {"bins": np.linspace(-0.05, 0.05, 50) , "log": False ,      "underflow": -9.},
+    'PrimaryCluster_zposition'     : {"bins": np.linspace(-0.10, 0.10, 50) , "log": False ,      "underflow": -9.},
+    'PrimaryCluster_energy'       : {"bins": np.linspace(0, 590, 50)      , "log": False ,      "underflow": -9.},
+    'PrimaryCluster_time'          : {"bins": np.linspace(0, 0.05, 50)     , "log": False ,      "underflow": -9.},
     'PrimaryElectron_number_inDrift':{"bins": np.linspace(0, 200, 50)      , "log": False ,       "underflow": 0.},
     'PrimaryElectron_number_inDrift_aval':{"bins": np.linspace(0, 200, 50)      , "log": False ,  "underflow": 0.},
     'PrimaryElectron_number_NotinDrift_aval':{"bins": np.linspace(0, 200, 50)   , "log": False ,  "underflow": 0.},
     'FinalElectron_number'         : {"bins": np.linspace(0, 1000, 50)     , "log": False ,       "underflow": 0.},
-    'Effective_Gain'               : {"bins": np.linspace(0, 20, 50)       , "log": False ,    "underflow": -999.},
+    'Effective_Gain'               : {"bins": np.linspace(0, 20, 50)       , "log": False ,      "underflow": -9.},
 }
 
 

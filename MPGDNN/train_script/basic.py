@@ -10,15 +10,15 @@ import uproot as u
 import awkward as ak
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--inFile", dest='infile', default='../../Simulation/test_xray_2nd.root', type=str, help="input root file (default=../../Simulation/test_xray_2nd.root)")
+parser.add_argument("-i", "--inFile", dest='infile', default='../../Simulation/150GeVMuon_v1.root', type=str, help="input root file (default=../../Simulation/test_xray_2nd.root)")
 args = parser.parse_args()
 
 #dataset
 process_tree = u.open(args.infile)["full_simulation_tree"]
-train_base = process_tree.arrays(["PrimaryElectron_number","PrimaryElectron_number_inDrift","PrimaryElectron_number_inDrift_aval", "FinalElectron_number"], library="pd")
+train_base = process_tree.arrays(["PrimaryElectron_number","PrimaryCluster_number","PrimaryCluster_xposition","PrimaryCluster_yposition","PrimaryCluster_zposition","PrimaryElectron_xposition","PrimaryElectron_yposition","PrimaryElectron_zposition", "FinalElectron_number"], library="pd")
 
-x_train = train_base.iloc[0:10000, 0:3]
-y_train = train_base.iloc[0:10000, 3:4]
+x_train = train_base.iloc[0:100000, 0:2522]
+y_train = train_base.iloc[0:100000, 2522:2523]
 
 # print(x_train)
 # print(y_train)
@@ -49,7 +49,7 @@ Y_train = y_train.to_numpy()
 X_train = torch.tensor(X_train, dtype=torch.float32)
 Y_train = torch.tensor(Y_train, dtype=torch.float32)
 torch_dataset = torch.utils.data.TensorDataset(X_train, Y_train)  # 组成torch专门的数据库
-batch_size = 6
+batch_size = 400
 trainval_ratio = 0.8
 test_ratio = 0.2
 train_ratio = 0.8
@@ -73,32 +73,44 @@ train_data = torch.utils.data.DataLoader(train,
 
 import torch.optim as optim
  
-feature_number = 3
+feature_number = 2522
 out_prediction = 1
-learning_rate = 0.01
-epochs = 20
+learning_rate = 0.001
+epochs = 300
  
 class Net(torch.nn.Module):
-    def __init__(self, n_feature, n_output, n_neuron1, n_neuron2,n_layer):
+    def __init__(self, n_feature, n_output, n_neuron1, n_neuron2,n_neuron3,n_layer):
         self.n_feature=n_feature
         self.n_output=n_output
         self.n_neuron1=n_neuron1
         self.n_neuron2=n_neuron2
+        self.n_neuron3=n_neuron3
         self.n_layer=n_layer
         super(Net, self).__init__()
         self.input_layer = torch.nn.Linear(self.n_feature, self.n_neuron1)
-        self.hidden1 = torch.nn.Linear(self.n_neuron1, self.n_neuron2)  
-        self.hidden2 = torch.nn.Linear(self.n_neuron2, self.n_neuron2)
-        self.predict = torch.nn.Linear(self.n_neuron2, self.n_output)
+        self.conv1d_layer = torch.nn.Conv1d(in_channels=2522, out_channels=64, kernel_size=3, stride=1, padding=1)
+#         self.input_layer2 = torch.nn.Conv1d(128, 64, 3, 1, 1)
+        self.hiddenin = torch.nn.Linear(self.n_neuron1, self.n_neuron2) 
+#         self.hiddenin = torch.nn.Linear(400 * 64 * 2522, self.n_neuron2) 
+        self.hiddenmiddle = torch.nn.Linear(self.n_neuron2, self.n_neuron2)
+        self.hiddenout = torch.nn.Linear(self.n_neuron2, self.n_neuron3)
+        self.predict = torch.nn.Linear(self.n_neuron3, self.n_output)
+        self.dropout = nn.Dropout(p=0.1)
  
     def forward(self, x):
         out = self.input_layer(x)
         out = torch.relu(out)
-        out = self.hidden1(out)
+#         out = self.input_layer2(out)
+#         out = torch.relu(out)
+        out = self.hiddenin(out)
+        out = self.dropout(out)
         out = torch.relu(out)
         for i in range(self.n_layer):
-            out = self.hidden2(out)
+            out = self.hiddenmiddle(out)
+            out = self.dropout(out)
             out = torch.relu(out) 
+        out = self.hiddenout(out)
+        out = torch.relu(out)
         out = self.predict(
             out
         ) 
@@ -106,9 +118,14 @@ class Net(torch.nn.Module):
     
 net = Net(n_feature=feature_number,
                       n_output=out_prediction,
-                      n_layer=1,
-                      n_neuron1=32,
-                      n_neuron2=32)
+                      n_layer=2,
+                      n_neuron1=512,
+                      n_neuron2=256,
+                      n_neuron3=64
+         )
+# from torchsummary import summary
+# summary(net, (1,1,feature_number))
+# exit(0)
 # net.to(device)
 optimizer = optim.Adam(net.parameters(), learning_rate)
 criteon = torch.nn.MSELoss()
@@ -118,6 +135,14 @@ validation_loss=[]
 for epoch in range(epochs):  # 整个数据集迭代次数
     net.train()
     for batch_idx, (data, target) in enumerate(train_data):
+#         print(data)
+#         print(data.size())
+#         exit(0)
+#         data = torch.unsqueeze(data, -1)
+        
+#         print(data)
+#         print(data.size())
+#         exit(0)
         logits = net.forward(data)  # 前向计算结果（预测结果）
         loss = criteon(logits, target)  # 计算损失
         train_losses=loss.detach().numpy()
@@ -136,7 +161,7 @@ for epoch in range(epochs):  # 整个数据集迭代次数
         logit.append(logits[0])
     average_loss= criteon(torch.tensor(logit),torch.tensor(target)).detach().numpy()  # 计算损失
     validation_loss.append(average_loss) # 记录历史验证误差（每代）
-    print('\nTrain Epoch {0}: for the Average loss of VAL'.format(str(epoch)))
+    print('\nTrain Epoch {0}: loss of VAL is {1}'.format(str(epoch),str(average_loss)))
     
 plt.figure()
 plt.plot([x+1 for x in range(epochs)], validation_loss, color='black', linestyle='-',label='validation loss')

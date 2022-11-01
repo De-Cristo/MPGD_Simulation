@@ -34,7 +34,7 @@ def main():
     SM.import_transferfunction(TransferFunction)
     if SM.Nstrip!=0: # only if we have readout boards simulated. (by weighting fields)
         SM.link_readouts()
-    SM.set_sensitive_space_time(-20 * SM.pitch, -20 * SM.pitch, -0.1000, 20 * SM.pitch,  20 * SM.pitch, 0.1000, 0, 1000, 0.5)
+    SM.set_sensitive_space_time(-50 * SM.pitch, -50 * SM.pitch, -0.1000, 50 * SM.pitch,  50 * SM.pitch, 0.1000, 0, 1000, 0.5)
     ###########################
     nevents = 10
     nevents = args.neve
